@@ -269,12 +269,12 @@ function processComparator(processedCurrent,processedNew) {
   // console.log(firstToModify);
   // console.log(`This is difference:`)
   // console.log(difference);
-  let fixedYAML = jsyaml.dump(firstToModify,{skipInvalid:true})
+  let fixedYAML = jsyaml.dump(firstToModify,{skipInvalid:true,noCompatMode:true})
   let differenceYAML;
   if(Object.keys(difference).length === 0) {
     differenceYAML = "#We couldn't find any missing option. Your config is up-to-date!";
   }else{
-    differenceYAML = jsyaml.dump(difference,{skipInvalid:true})
+    differenceYAML = jsyaml.dump(difference,{skipInvalid:true,noCompatMode:true})
   }
   document.getElementById("output-fixed").innerText = fixedYAML;
   document.getElementById("output-differences").innerText = differenceYAML;
