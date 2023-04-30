@@ -140,6 +140,7 @@ function compareFiles() {
   clearResults();
   processed1 = undefined;
   processed2 = undefined;
+  outputExtension = ".yml";
   let input1 = document.getElementById("current-config");
   let input2 = document.getElementById("new-config");
   let currentFile = input1.files[0];
@@ -148,18 +149,20 @@ function compareFiles() {
     alert('Current configuration cannot be empty!');
     return;
   }
-  if(!currentFile.name.endsWith(".yml")) {
-    alert('Current configuration must be a valid yaml file!');
+  let matchExtension = allowedExtensions.find(r=> currentFile.name.endsWith(r));
+  if(!matchExtension) {
+    alert(`Current configuration must be a valid yaml file!\nAllowed types: ${allowedExtensions.join(" ")}`);
     return;
   }
   if(typeof newFile == "undefined") {
     alert('New configuration cannot be empty!');
     return;
   }
-  if(!newFile.name.endsWith(".yml")) {
-    alert('New configuration must be a valid yaml file!');
+  if(!allowedExtensions.find(r=> newFile.name.endsWith(r))) {
+    alert(`New configuration must be a valid yaml file!\nAllowed types: ${allowedExtensions.join(" ")}`);
     return;
   }
+  outputExtension = matchExtension;
   // console.log(`Attempting to compare '${currentFile.name}' & '${newFile.name}'`);
   input1.value = "";
   input2.value = "";
@@ -220,6 +223,8 @@ function mergeObjects(obj1, obj2) {
 }
 let processed1;
 let processed2;
+let outputExtension;
+let allowedExtensions = [".yaml",".yml",".txt"]
 function processComparator(processedCurrent,processedNew) {
   let schem = jsyaml.DEFAULT_SCHEMA;
   let first = jsyaml.load(processedCurrent,schem)
@@ -276,7 +281,7 @@ function downloadFixed() {
   
   // Create a link element with download attribute pointing to the URL object
   const link = document.createElement('a');
-  link.download = 'fixed.yml'; // Set the download file name
+  link.download = `fixed${outputExtension}`; // Set the download file name
   link.href = url; // Set the link href to the URL object
   
   // Append the link element to the document body
@@ -299,7 +304,7 @@ function downloadDifferences() {
   
   // Create a link element with download attribute pointing to the URL object
   const link = document.createElement('a');
-  link.download = 'differences.yaml'; // Set the download file name
+  link.download = `differences${outputExtension}`; // Set the download file name
   link.href = url; // Set the link href to the URL object
   
   // Append the link element to the document body
@@ -342,11 +347,12 @@ function checkYamlFile(evt) {
     alert('Configuration cannot be empty!');
     return;
   }
-  if(!file.name.endsWith(".yml")) {
+  let matchExtension = allowedExtensions.find(r=> file.name.endsWith(r));
+  if(!matchExtension) {
     let f = document.getElementById(evt.target.id);
     if(f) f.value = "";
     console.log(`Wrong! File type not allowed: '${file.name}'`);
-    alert('Configuration must be a valid yaml file!');
+    alert(`Configuration must be a valid yaml file!\nAllowed types: ${allowedExtensions.join(" ")}`);
     return;
   }
   console.log(`Detected '${evt.target.id}' file!`);
