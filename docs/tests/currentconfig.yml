@@ -13,3 +13,4 @@ option4:
   - "This is suboption4-2"
 option5: 100
 option6: 100.99
+option8: "This is a really really really really really really really really really really really really really long string to verify long strings support!"

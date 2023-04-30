@@ -20,7 +20,7 @@ const errorsFormat = {
     classAndLine: new RegExp(/\([a-zA-Z0-9_.-]+\.java\:([\d?.]+)\)/g,"g"),
   },
 }
-createTableVersion();
+//createTableVersion();
 function createTableVersion() {
   let tableErrors = document.getElementById('table-errors');
   if(tableErrors) {
@@ -66,7 +66,7 @@ function unmarkAll() {
 function test() {
   console.log("TESTING WORKS!")
 }
-let t = ["current-config","new-config","appearance","compare-button","f-c-b","d-o-b"];
+let t = ["current-config","new-config","appearance","compare-button","f-c-b","d-o-b","download-fixed","download-differences"];
 function toggleDarkmode() {
     if (document.getElementById('darkmode').checked == true) {
       document.body.classList.add('dark');
@@ -164,13 +164,13 @@ function compareFiles() {
   input1.value = "";
   input2.value = "";
   var reader1 = new FileReader();
-  let schem1 = jsyaml.DEFAULT_SCHEMA;
+  //let schem1 = jsyaml.DEFAULT_SCHEMA;
   reader1.onloadend = function(event) {
     // console.log(`Starting load of ${currentFile.name}`)
     let result = event.target.result;
     // console.log(`Successfully result ${currentFile.name}`)
     //processed1 = result;
-    console.log(result);
+    //console.log(result);
     /*
     processed1 = jsyaml.load(result, { schem1 });
     console.log(`Successfully loaded ${currentFile.name}`)
@@ -178,14 +178,14 @@ function compareFiles() {
     */
     //if(processed2) processComparator();
 
-    var reader2 = new FileReader();
-    let schem2 = jsyaml.DEFAULT_SCHEMA;
+    //var reader2 = new FileReader();
+    //let schem2 = jsyaml.DEFAULT_SCHEMA;
     reader1.onloadend = function(event2) {
       // console.log(`Starting load of ${newFile.name}`)
       let result2 = event2.target.result;
       // console.log(`Successfully result ${newFile.name}`)
       //processed2 = result2;
-      console.log(result2);
+      //console.log(result2);
       //processed2 = jsyaml.load(result2, { schem2 });
       //console.log(`Successfully loaded ${newFile.name}`)
       //console.log(processed2)
@@ -195,22 +195,6 @@ function compareFiles() {
     reader1.readAsText(newFile)
   }
   reader1.readAsText(currentFile)
-}
-function mergeObjects2(obj1, obj2) {
-  for (let key in obj2) {
-    if (obj2.hasOwnProperty(key)) {
-      if (
-        typeof obj2[key] === "object" &&
-        obj2[key] !== null &&
-        typeof obj1[key] === "object" &&
-        obj1[key] !== null
-      ) {
-        mergeObjects(obj1[key], obj2[key]);
-      } else {
-        obj1[key] = obj2[key];
-      }
-    }
-  }
 }
 function mergeObjects(obj1, obj2) {
   const diff = {};
@@ -269,18 +253,66 @@ function processComparator(processedCurrent,processedNew) {
   // console.log(firstToModify);
   // console.log(`This is difference:`)
   // console.log(difference);
-  let fixedYAML = jsyaml.dump(firstToModify,{skipInvalid:true,noCompatMode:true})
+  let fixedYAML = jsyaml.dump(firstToModify,{skipInvalid:true,lineWidth:-1,noCompatMode:true})
   let differenceYAML;
   if(Object.keys(difference).length === 0) {
     differenceYAML = "#We couldn't find any missing option. Your config is up-to-date!";
   }else{
-    differenceYAML = jsyaml.dump(difference,{skipInvalid:true,noCompatMode:true})
+    differenceYAML = jsyaml.dump(difference,{skipInvalid:true,lineWidth:-1,noCompatMode:true})
   }
+  processed1 = fixedYAML;
+  processed2 = differenceYAML;
   document.getElementById("output-fixed").innerText = fixedYAML;
   document.getElementById("output-differences").innerText = differenceYAML;
   // console.log(fixedYAML);
   // console.log(differenceYAML);
   //console.log(YAML)
+}
+function downloadFixed() {
+  const blob = new Blob([processed1], { type: 'text/yaml' });
+
+  // Create a URL object with the Blob data
+  const url = window.URL.createObjectURL(blob);
+  
+  // Create a link element with download attribute pointing to the URL object
+  const link = document.createElement('a');
+  link.download = 'fixed.yml'; // Set the download file name
+  link.href = url; // Set the link href to the URL object
+  
+  // Append the link element to the document body
+  document.body.appendChild(link);
+  
+  // Programmatically click the link to initiate the download of the YAML file
+  link.click();
+  
+  // Remove the link element from the document body
+  document.body.removeChild(link);
+  
+  // Revoke the URL object to free up system resources
+  window.URL.revokeObjectURL(url);
+}
+function downloadDifferences() {
+  const blob = new Blob([processed2], { type: 'text/yaml' });
+
+  // Create a URL object with the Blob data
+  const url = window.URL.createObjectURL(blob);
+  
+  // Create a link element with download attribute pointing to the URL object
+  const link = document.createElement('a');
+  link.download = 'differences.yaml'; // Set the download file name
+  link.href = url; // Set the link href to the URL object
+  
+  // Append the link element to the document body
+  document.body.appendChild(link);
+  
+  // Programmatically click the link to initiate the download of the YAML file
+  link.click();
+
+  // Remove the link element from the document body
+  document.body.removeChild(link);
+
+  // Revoke the URL object to free up system resources
+  window.URL.revokeObjectURL(url);
 }
 function readFile(evt) {
   clearIssues();
@@ -298,7 +330,6 @@ function readFile(evt) {
 function checkYamlFile(evt) {
   var files = evt.target.files;
   var file = files[0];
-  console.log(evt.target.id)
   clearResults();
   processed1 = undefined;
   processed2 = undefined;
@@ -307,271 +338,18 @@ function checkYamlFile(evt) {
   if(typeof file == "undefined") {
     let f = document.getElementById(evt.target.id);
     if(f) f.value = "";
-    alert('Configuration cannot be empty!');
     console.log(`Wrong! File is null: '${file.name}'`);
+    alert('Configuration cannot be empty!');
     return;
   }
   if(!file.name.endsWith(".yml")) {
     let f = document.getElementById(evt.target.id);
     if(f) f.value = "";
-    alert('Configuration must be a valid yaml file!');
     console.log(`Wrong! File type not allowed: '${file.name}'`);
+    alert('Configuration must be a valid yaml file!');
     return;
   }
-}
-function processData(result) {
-  let errorFull = document.getElementById("error-full");
-  if(errorFull) {
-    let allowed = [];
-    for(let errorType of Object.keys(errorsFormat)) {
-      let option = document.getElementById(`${errorType}-option`);
-      if(option && option.checked) allowed.push(errorType);
-    }
-    errorFull.style.display = "block";
-    let totalErrors = getErrors(result);
-    let totalErrorsSize = totalErrors.size;
-    totalErrors = new Map([...totalErrors].filter(([key,value])=>allowed.includes(value.type)));
-    let filteredErrorsSize = totalErrorsSize - totalErrors.size;
-    if(totalErrors.size == 0) {
-      let divError = document.createElement("div");
-      divError.classList.add("error-content","no-errors");
-      divError.setAttribute("align-text","center")
-      let p = document.createElement("p");
-      p.innerHTML = `NO ERRORS FOUND IN YOUR .log FILE!${filteredErrorsSize > 0?`<br>Ignored errors: ${filteredErrorsSize}`:``}`
-      divError.append(p);
-      errorFull.append(divError);
-    }else{
-      let divErrorH = document.createElement("div");
-      divErrorH.classList.add("error-content","error-header");
-      divErrorH.setAttribute("align-text","center")
-      let pH = document.createElement("p");
-      pH.innerHTML = `Errors found: ${totalErrors.size}${filteredErrorsSize > 0?`<br>Ignored errors: ${filteredErrorsSize}`:``}`
-      divErrorH.append(pH);
-      errorFull.append(divErrorH);
-      for(let [index,error] of totalErrors) {
-        let type = error.type;
-        if(type == "MissingDependency") {
-          let divError = document.createElement("div");
-          divError.classList.add("error-content","error-yellow");
-          divError.setAttribute("align-text","left")
-          let p = document.createElement("p");
-          p.innerHTML = `${error.message}`
-          divError.append(p);
-          errorFull.append(divError);
-        }else if(type == "CouldNotPassEvent") {
-          let divError = document.createElement("div");
-          divError.classList.add("error-content","error-red");
-          divError.setAttribute("align-text","left")
-          let p = document.createElement("p");
-          p.innerHTML = `${error.message}`
-          divError.append(p);
-          errorFull.append(divError);
-        }else if(type == "CannotTranslateNull") {
-          let divError = document.createElement("div");
-          divError.classList.add("error-content","error-red");
-          divError.setAttribute("align-text","left")
-          let p = document.createElement("p");
-          p.innerHTML = `${error.message}`
-          divError.append(p);
-          errorFull.append(divError);
-        }
-      }
-      /*
-      for(let [type,errors] of totalErrors) {
-        for(let [pluginName,error] of errors) {
-          if(type == "MissingDependency") {
-            let divError = document.createElement("div");
-            divError.classList.add("error-content","error-yellow");
-            divError.setAttribute("align-text","left")
-            let p = document.createElement("p");
-            p.innerHTML = `${error.message}`
-            divError.append(p);
-            errorFull.append(divError);
-          }else if(type == "CouldNotPassEvent") {
-            let divError = document.createElement("div");
-            divError.classList.add("error-content","error-red");
-            divError.setAttribute("align-text","left")
-            let p = document.createElement("p");
-            p.innerHTML = `${error.message}`
-            divError.append(p);
-            errorFull.append(divError);
-          }else if(type == "CannotTranslateNull") {
-            let divError = document.createElement("div");
-            divError.classList.add("error-content","error-red");
-            divError.setAttribute("align-text","left")
-            let p = document.createElement("p");
-            p.innerHTML = `${error.message}`
-            divError.append(p);
-            errorFull.append(divError);
-          }
-        }
-      }
-      */
-    }
-  }
-}
-function getErrors(result) {
-  //console.log(result);
-  let errors = new Map();
-  for(let errorIdentifier of Object.keys(errorsFormat)) {
-    console.log(`Checking for ${errorIdentifier}..`);
-    if(errorIdentifier == "MissingDependency") {
-      let errorformat = errorsFormat[errorIdentifier];
-      let matchs = result.match(errorformat.regex);
-      if(matchs) {
-        for(let match of matchs) {
-          let index = result.indexOf(match);
-          if(errors.has(index)) {
-            console.log(`Duplicated error index: ${index} | ${errorIdentifier} | ${match}`);
-            continue;
-          }
-          let nameMatcher = match.match(/Could not load 'plugins\/([A-z0-9.-]+)\.jar' in folder /g);
-          let dependenciesMatcher = match.match(/org\.bukkit\.plugin\.UnknownDependencyException: Unknown\/missing dependency plugins: \[([^']+)\]. Please/g);
-          let pluginNameMatcher = match.match(/Please download and install these plugins to run '([^']+)'\./g);
-          let jarName = nameMatcher[0].replace(/Could not load 'plugins\//g,"").replace(/\.jar' in folder /g,"") + ".jar";
-          let dependencies = dependenciesMatcher[0].replace(/org\.bukkit\.plugin\.UnknownDependencyException: Unknown\/missing dependency plugins: /g,"").slice(0, -8);
-          let pluginName = pluginNameMatcher[0].replace(/Please download and install these plugins to run '/g,"").slice(0,-2);
-          // if(!errors.has(errorIdentifier)) {
-          //   errors.set(errorIdentifier,new Map());
-          // }
-          // let map = errors.get(errorIdentifier);
-          // let error = {
-          //   message: `Failed to install <strong>${pluginName}</strong> (File: ${jarName})<br>
-          //   Couldn't install ${jarName} plugin due to missing dependencies: ${dependencies}`
-          // }
-          // map.set(pluginName,error)
-          let error = {
-            type: errorIdentifier,
-            message: `Failed to install <strong>${pluginName}</strong> (File: ${jarName})<br>
-            Couldn't install ${jarName} plugin due to missing dependencies: ${dependencies}`
-          }
-          errors.set(index,error)
-        }
-      }
-    }else if(errorIdentifier == "CouldNotPassEvent") {
-      console.log(`Checking for ${errorIdentifier}..`);
-      let errorformat = errorsFormat[errorIdentifier];
-      let matchs = result.match(errorformat.regex);
-      //console.log(errorformat.regex);
-      //console.log(matchs);
-      if(matchs) {
-        for(let match of matchs) {
-          let index = result.indexOf(match);
-          if(errors.has(index)) {
-            console.log(`Duplicated error index: ${index} | ${errorIdentifier} | ${match}`);
-            continue;
-          }
-          let left = match.replace(/Could not pass event /g,"");
-          let eventName = left.split(" ")[0];
-          left = left.slice(eventName.length).trim().slice(3);
-          let pluginName = left.split(" ")[0];
-          let version = left.split(" ")[1];
-          // if(!errors.has(errorIdentifier)) {
-          //   errors.set(errorIdentifier,new Map());
-          // }
-          // let map = errors.get(errorIdentifier);
-          // let error = {
-          //   message: `Plugin <strong>${pluginName}</strong> (${version}) threw an exception!<br>
-          //   Error when passing event '${eventName}'. Contact the developer so he can fix this issue!`
-          // }
-          // map.set(pluginName,error)
-          let error = {
-            type: errorIdentifier,
-            message: `Plugin <strong>${pluginName}</strong> (${version}) threw an exception!<br>
-            Error when passing event '${eventName}'. Contact the developer so he can fix this issue!`
-          }
-          errors.set(index,error)
-        }
-      }
-    }else if(errorIdentifier == "ErrorWhileEnablingCannotTranslateNull") {
-      console.log(`Checking for ${errorIdentifier}..`);
-      let errorformat = errorsFormat[errorIdentifier];
-      let matchs = result.match(errorformat.regex);
-      //console.log(errorformat.regex);
-      //console.log(matchs);
-      if(matchs) {
-        for(let match of matchs) {
-          let index = result.indexOf(match);
-          if(errors.has(index)) {
-            console.log(`Duplicated error index: ${index} | ${errorIdentifier} | ${match}`);
-            continue;
-          }
-          let left = match.replace(/Could not pass event /g,"");
-          let eventName = left.split(" ")[0];
-          left = left.slice(eventName.length).trim().slice(3);
-          let pluginName = left.split(" ")[0];
-          let version = left.split(" ")[1];
-          // if(!errors.has(errorIdentifier)) {
-          //   errors.set(errorIdentifier,new Map());
-          // }
-          // let map = errors.get(errorIdentifier);
-          // let error = {
-          //   message: `Plugin <strong>${pluginName}</strong> (${version}) threw an exception!<br>
-          //   Error when passing event '${eventName}'. Contact the developer so he can fix this issue!`
-          // }
-          // map.set(pluginName,error)
-          let error = {
-            type: errorIdentifier,
-            message: `Plugin <strong>${pluginName}</strong> (${version}) threw an exception!<br>
-            Error when passing event '${eventName}'. Contact the developer so he can fix this issue!`
-          }
-          errors.set(index,error)
-        }
-      }
-    }else if(errorIdentifier == "CannotTranslateNull") {
-      console.log(`Checking for ${errorIdentifier}..`);
-      let errorformat = errorsFormat[errorIdentifier];
-      let matchs = result.match(errorformat.regex);
-      //console.log(matchs);
-      if(matchs) {
-        for(let match of matchs) {
-          let index = result.indexOf(match);
-          if(errors.has(index)) {
-            console.log(`Duplicated error index: ${index} | ${errorIdentifier} | ${match}`);
-            continue;
-          }
-          let first = match.match(errorformat.first);
-          let left = match.replace(first[0],"");
-          //console.log(left)
-          let packageMatcher = left.match(errorformat.package);
-          let package = packageMatcher[0];
-          //console.log(package)
-          let clazz = package.match(errorformat.class)[0].slice(0,-1);
-          //console.log(clazz)
-          let method = package.replace(clazz,"");
-          let clazzAndLine = method.match(errorformat.classAndLine)[0]
-          method = method.replace(clazzAndLine,"").slice(1);;
-          let jarLocation = left.replace(package,"").trim();
-          let line = clazzAndLine.match(/\.java\:[\d?]+/g)[0].slice(6);
-          let jarName = jarLocation.replace(/\.jar\:[\d?]+/g,"").slice(2,-1);
-          // if(!errors.has(errorIdentifier)) {
-          //   errors.set(errorIdentifier,new Map());
-          // }
-          // let map = errors.get(errorIdentifier);
-          // let error = {
-          //   message: `Plugin <strong>${pluginName}</strong> (${version}) threw an exception!<br>
-          //   Error when passing event '${eventName}'. Contact the developer so he can fix this issue!`
-          // }
-          // map.set(pluginName,error)
-          let error = {
-            type: errorIdentifier,
-            message: `A plugin threw an exception while translating colors!<br>
-            Class error: ${clazz}<br>
-            Method error: ${method}<br>
-            Line error: ${line}<br>
-            File name: ${jarName}.jar<br>
-            <span style="font-weight: bold;color: #a30a00;font-size: 19px">⚠️ Warning: ⚠️</span><br>
-            If plugin was working fine before you edited any .yml file to customize, then YOU REMOVED something from it!<br>
-            We highly suggest you to reinstall the plugin and be careful when editing stuff or contact the developer.`
-          }
-          errors.set(index,error)
-        }
-      }
-    }
-  }
-  // const sortNumAsc = new Map([...errors].sort((a, b) => a[0] - b[0]));
-  const sortNumAsc = new Map([...errors].sort());
-  return sortNumAsc;
+  console.log(`Detected '${evt.target.id}' file!`);
 }
 window.onclick = function(event) {
   if (event.target == document.getElementById("error-full")) {
