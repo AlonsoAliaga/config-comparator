@@ -44,9 +44,28 @@ function copyTextToClipboard(text) {
   textArea.select();
 
   document.execCommand('copy');
-  alert('You text was copied! Ready to paste!\n\nThanks for using our tool!\n- AlonsoAliaga');
+  alertBar();
   document.body.removeChild(textArea);
 }
+
+let copiedTimeout;
+function alertBar(text = ['Thanks for using our tool!','- AlonsoAliaga'], time = 3000) {
+  console.log(`Alerting..`);
+  if(copiedTimeout) {
+    clearTimeout(copiedTimeout);
+    var sb = document.getElementById("snackbar");
+    sb.classList.remove("show6","show");
+  }
+  var sb = document.getElementById("snackbar");
+
+  //this is where the class name will be added & removed to activate the css
+
+  sb.innerHTML = `<b>${text[0]}</b><br><span style="font-size: small;">${text[1]}</span>`
+  sb.classList.add(time == 6000 ? "show6":"show");
+
+  copiedTimeout = setTimeout(()=>{ sb.classList.remove("show6","show"); }, time);
+}
+
 function markAll() {
   for(let errorType of Object.keys(errorsFormat)) {
     let errorTypeOption = document.getElementById(`${errorType}-option`);
@@ -108,6 +127,23 @@ function checkSite(window) {
     if(!href.includes(atob("YWxvbnNvYWxpYWdhLmdpdGh1Yi5pbw=="))) {
       try{document.title = `Page stolen from https://${atob("YWxvbnNvYWxpYWdhLmdpdGh1Yi5pbw==")}`;}catch(e){}
       window.location = `https://${atob("YWxvbnNvYWxpYWdhLmdpdGh1Yi5pbw==")}/config-comparator/`}
+  });
+  fetch('https://api.github.com/repos/AlonsoAliaga/AlonsoAliagaAPI/contents/api/tools/tools-list.json?ref=main')
+  .then(res => res.json())
+  .then(content => {
+    const decoded = atob(content.content);
+    const parsed = JSON.parse(decoded);
+    let toolsData = parsed;
+    let toolsArray = []
+    console.log(`Loading ${Object.keys(toolsData).length} tools..`);
+    for(let toolData of toolsData) {
+      //console.log(toolData);
+      let clazz = typeof toolData.clazz == "undefined" ? "" : ` class="${toolData.clazz}"`;
+      let style = typeof toolData.style == "undefined" ? "" : ` style="${toolData.style}"`;
+      toolsArray.push(`<span>💠</span> <span${clazz}${style}><a href="${toolData.link}">${toolData.name}</a></span><br>`);
+    }
+    document.getElementById("tools-for-you").innerHTML = toolsArray.join(`
+`);
   });
 }
 function selectTab(evt, tabName, buttonName) {
@@ -227,9 +263,24 @@ let outputExtension;
 let allowedExtensions = [".yaml",".yml",".txt"]
 function processComparator(processedCurrent,processedNew) {
   let schem = jsyaml.DEFAULT_SCHEMA;
-  let first = jsyaml.load(processedCurrent,schem)
-  let second = jsyaml.load(processedNew,schem)
-  let firstToModify = jsyaml.load(processedCurrent,schem)
+  //let first = jsyaml.load(processedCurrent,schem)
+  let firstToModify
+  try{
+    firstToModify = jsyaml.load(processedCurrent,schem)
+  }catch(e) {
+    console.log(`Invalid YAML first!`)
+    alertBar([`❌ File #1 is not valid YAML file! ❌`,`Try again with a valid file!`]);
+    return;
+  }
+  let second
+  try{
+    second = jsyaml.load(processedNew,schem)
+  }catch(e) {
+    console.log(`Invalid YAML second!`)
+    alertBar([`❌ File #2 is not valid YAML file! ❌`,`Try again with a valid file!`]);
+    return;
+    //alertBar();
+  }
   // console.log(first)
   // console.log(second)
   // setTimeout(() => {
@@ -258,17 +309,51 @@ function processComparator(processedCurrent,processedNew) {
   // console.log(firstToModify);
   // console.log(`This is difference:`)
   // console.log(difference);
-  let fixedYAML = jsyaml.dump(firstToModify,{skipInvalid:true,lineWidth:-1,noCompatMode:true})
+  let options = {
+    skipInvalid:true,
+    lineWidth:-1,
+    noCompatMode:true,
+    quotingType: '"',
+    forceQuotes: true
+  }
+  let fixedYAML = jsyaml.dump(firstToModify,options)
   let differenceYAML;
   if(Object.keys(difference).length === 0) {
     differenceYAML = "#We couldn't find any missing option. Your config is up-to-date!";
   }else{
-    differenceYAML = jsyaml.dump(difference,{skipInvalid:true,lineWidth:-1,noCompatMode:true})
+    differenceYAML = jsyaml.dump(difference,options)
   }
   processed1 = fixedYAML;
   processed2 = differenceYAML;
-  document.getElementById("output-fixed").innerText = fixedYAML;
-  document.getElementById("output-differences").innerText = differenceYAML;
+  //const fixedHtml = Prism.highlight(fixedYAML, Prism.languages.yaml, 'yaml');
+  //document.getElementById("output-fixed").innerText = fixedHtml;
+  document.getElementById("output-fixed").textContent = fixedYAML;
+  if(!adBlockEnabled) {
+    document.getElementById("output-fixed").className = "language-yaml";
+    Prism.highlightElement(document.getElementById("output-fixed"));
+    document.getElementById("output-fixed").parentElement.style.cssText  = 'font-size: 15px;line-height: 1 !important;';
+    setTimeout(()=>{
+      document.getElementById("output-fixed").parentElement.style.cssText  = 'font-size: 15px;line-height: 1 !important;';
+    },100);
+  }else{
+    document.getElementById("output-fixed").parentElement.style.cssText  = 'font-size: 15px;line-height: 1 !important;';
+  }
+  document.getElementById("output-differences").textContent = differenceYAML;
+  if(!adBlockEnabled) {
+    document.getElementById("output-fixed").className = "language-yaml";
+    Prism.highlightElement(document.getElementById("output-differences"));
+    document.getElementById("output-differences").parentElement.style.cssText  = 'font-size: 15px;line-height: 1 !important;';
+    setTimeout(()=>{
+      document.getElementById("output-differences").parentElement.style.cssText  = 'font-size: 15px;line-height: 1 !important;';
+    },100);
+  }else{
+    document.getElementById("output-differences").parentElement.style.cssText  = 'font-size: 15px;line-height: 1 !important;';
+  }
+  if(adBlockEnabled) {
+    alertBar([`🧪 Configurations successfully compared! 🧪`,`🚫 Disable AdBlock to view formatted configurations!`],6000);
+  }else{
+    alertBar([`🧪 Configurations successfully compared! 🧪`,`Thanks for using our tool!`],6000);
+  }
   // console.log(fixedYAML);
   // console.log(differenceYAML);
   //console.log(YAML)
@@ -438,3 +523,34 @@ function getUpdatedOutputText(data) {
   return result;
 }
 toggleDarkmode();
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadCounter();
+  checkSite(window);
+  clearResults();
+});
+let adCuts = ["ad-1_7-1_8","ad-1_9_2-1_12_2","ad-1_16_4-and-above"]
+function lockCutsWithMessage(className,message,iconUrl='https://raw.githubusercontent.com/AlonsoAliaga/generator/main/assets/images/lock-icon.png') {
+  let elements = adCuts.map(n=>document.getElementById(n)).filter(Boolean);
+  for(let element of elements) {
+    element = element.parentElement;
+    if(!element) continue;
+    element.classList.add(className);
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `<img src="${iconUrl}"><span>${message}</span>`;
+    element.append(ov);
+  }
+}
+function lockElementWithMessage(element,className,message,iconUrl='https://raw.githubusercontent.com/AlonsoAliaga/generator/main/assets/images/lock-icon.png') {
+  if(element) {
+    element.classList.add(className);
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `<img src="${iconUrl}"><span>${message}</span>`;
+    element.append(ov);
+  }
+}
+function processAds() {
+  lockCutsWithMessage("adlocked",`Disable AdBlock for this shortcut!`)
+}

@@ -16,8 +16,9 @@
     <meta property="og:image" content="https://raw.githubusercontent.com/AlonsoAliaga/alonsoaliaga.github.io/main/assets/img/apple-touch-icon.png">
     <meta property="og:description" content="Compare configuration files and update them easily with the missing options!">
     <meta property="og:url" content="https://alonsoaliaga.github.io/index.html">
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/themes/prism.min.css" rel="stylesheet">
   </head>
-  <body onload="loadCounter(); checkSite(window); clearResults();">
+  <body>
     <div class="content">
       <div class="header">
         <h1 style="font-family: MinecraftBold;">Config Comparator <a href="https://alonsoaliaga.com/config-comparator" rel="noopener" target="_blank">Updater</a></h1>
@@ -41,7 +42,9 @@
           </span><br>
             <B>2️⃣ Click "Compare Files ⭐" button!</B>
         </div>
-
+        <!-- <span id="snackbar"><b>💎 Successfully Copied! 💎</b><br><span style="font-size: small;">Thanks for using our tool!</span></span> -->
+        <span id="snackbar" class="tooltip">Loading..</span>
+        <br>
         <span style="font-family: MinecraftBold;">Options:</span>
         <div id="appearance" style="display: inline-block;font-family: MinecraftBold;padding: 5px 10px 5px 10px;" class="darkbuttonboxes">
           <input type="checkbox" checked id="darkmode" onclick="toggleDarkmode();"></input>
@@ -82,8 +85,9 @@
         <button id="d-o-b" class="tablinks" style="padding: 15px 25px;" onclick="selectTab(event, 'differences-only')">Differences Only</button>
         <div id="fixed-config" class="tabcontent">
           <h2>Fixed Configuration</h2>
-          <div class="code">
-            <pre id="output-fixed">Loading..</pre>
+          <div id="output-fixed-div" class="code">
+            <pre><code style="font-size: 15px;line-height: 0.7px !important;" id="output-fixed" class="language-yaml">Loading..</code></pre>
+            <!-- <pre style="font-size: 15px;" id="output-fixed">Loading..</pre> -->
           </div>
           This file is your current config with all missing options from new config!<br>
           <div id="download-fixed" style="display: inline-block;font-family: MinecraftBold;padding: 5px 10px 5px 10px;" class="darkbuttonboxes">
@@ -93,8 +97,9 @@
         </div>
         <div id="differences-only" class="tabcontent">
           <h2>Differences Only</h2>
-          <div class="code">
-            <pre id="output-differences">Loading..</pre>
+          <div id="output-differences-div" class="code">
+            <pre><code style="font-size: 15px;line-height: 0.7px !important;" id="output-differences" class="language-yaml">Loading..</code></pre>
+            <!-- <pre style="font-size: 15px;" id="output-differences">Loading..</pre> -->
           </div>
           This file contains only the missing missing options from new config in case you need it!<br>
           <div id="download-differences" style="display: inline-block;font-family: MinecraftBold;padding: 5px 10px 5px 10px;" class="darkbuttonboxes">
@@ -151,12 +156,7 @@
       <div class="options">
         <div style="font-size: 18px ;padding-top: 0px;padding-bottom: 0px; font-family: MinecraftRegular;" class="examples">
           <h2 style="font-size: 18px; font-family: MinecraftBold;">More tools for you:</h2>
-          <div style="text-align: left;font-size: 20px;">
-            <span >💠</span> <span class="rainbow" style="color:transparent"><a href="http://alonsoaliaga.github.io/generator">HEX Generator (RBG)</a></span><br>
-            <span >💠</span> <span><a href="http://alonsoaliaga.github.io/font-generator">Font Generator</a></span><br>
-            <span >💠</span> <span><a href="http://alonsoaliaga.github.io/yaml-parser">YAML/JSON Parser</a></span><br>
-            <span >💠</span> <span><a href="http://alonsoaliaga.github.io/pretty-json">Pretty JSON</a></span><br>
-            <span >💠</span> <span><a href="http://alonsoaliaga.github.io/version-generator">ViaVersion Protocol Generator</a></span>
+          <div style="text-align: left;font-size: 20px;" id="tools-for-you">
           </div>
           <br>
           <h2 style="color: transparent;font-size: 18px ;text-align: center; font-family: MinecraftBold;"><a href="https://alonsoaliaga.github.io" rel="noopener" target="_blank">AlonsoAliaga Development</a></h2>
@@ -180,14 +180,30 @@
     <script ></script>
   </div>
 
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5185973148525065"
+   crossorigin="anonymous"></script>
   <!-- <script src="jquery-1.6.1.min.js"></script> -->
   <script src="autoresize.jquery.min.js"></script>
   <script src="js-yaml.min.js"></script>
+  <!-- <script src="https:///prismjs@v1.x/components/prism-core.min.js"></script> -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/prism.min.js"></script> -->
+  <!-- <script src="https:///prismjs@v1.x/plugins/autoloader/prism-autoloader.min.js"></script> -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/prismjs@1.14.0/plugins/autoloader/prism-autoloader.js" data-autoloader-path="https://cdn.jsdelivr.net/npm/prismjs@1.14.0/components/"></script> -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+    
   <script src="script.js"></script>
-  <!-- <script src="script.js"></script> -->
+  <script src="resources.js"></script>
   
   <script>
-    
+  
+  
+
+
   </script>
   </body>
 </html>
