@@ -340,7 +340,7 @@ function processComparator(processedCurrent,processedNew) {
   }
   document.getElementById("output-differences").textContent = differenceYAML;
   if(!adBlockEnabled) {
-    document.getElementById("output-fixed").className = "language-yaml";
+    document.getElementById("output-differences").className = "language-yaml";
     Prism.highlightElement(document.getElementById("output-differences"));
     document.getElementById("output-differences").parentElement.style.cssText  = 'font-size: 15px;line-height: 1 !important;';
     setTimeout(()=>{
