@@ -485,3 +485,29 @@
     from {bottom: 30px; opacity: 1;}
     to {bottom: 0; opacity: 0;}
   }
+
+
+.adlocked {
+  position: relative;
+}
+.adlocked .overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 48, 48, 0.767);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  cursor: not-allowed;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+}
+.adlocked .overlay img {
+  width: 35px;
+}
+.adlocked .overlay span {
+  font-size: 14px;
+  color: #ffffff;
+}
