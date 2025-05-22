@@ -350,7 +350,7 @@ function processComparator(processedCurrent,processedNew) {
     document.getElementById("output-differences").parentElement.style.cssText  = 'font-size: 15px;line-height: 1 !important;';
   }
   if(adBlockEnabled) {
-    alertBar([`🧪 Configurations successfully compared! 🧪`,`🚫 Disable AdBlock to view formatted configurations!`],6000);
+    alertBar([`🧪 Configurations successfully compared! 🧪`,`🚫 Disable AdBlock to view formatted configurations! 🚫`],6000);
   }else{
     alertBar([`🧪 Configurations successfully compared! 🧪`,`Thanks for using our tool!`],6000);
   }
