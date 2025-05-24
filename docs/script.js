@@ -50,7 +50,7 @@ function copyTextToClipboard(text) {
 
 let copiedTimeout;
 function alertBar(text = ['Thanks for using our tool!','- AlonsoAliaga'], time = 3000) {
-  console.log(`Alerting..`);
+  //console.log(`Alerting..`);
   if(copiedTimeout) {
     clearTimeout(copiedTimeout);
     var sb = document.getElementById("snackbar");
